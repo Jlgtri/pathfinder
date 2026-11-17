@@ -61,6 +61,7 @@ class ConfigurationScreen extends HookConsumerWidget {
     final ValueNotifier<bool> isStarting = useState(false);
     final ValueNotifier<bool> editedByUser = useState(false);
     final ValueNotifier<String> validationError = useState('');
+    final GlobalKey<State<StatefulWidget>> urlKey = useMemoized(GlobalKey.new);
     final TextEditingController urlController = useTextEditingController();
     final FocusNode urlFocusNode = useFocusNode();
 
@@ -74,10 +75,14 @@ class ConfigurationScreen extends HookConsumerWidget {
             await ref.read(endpointUrlProvider.notifier).set(uri);
           }
 
-          // Future<void>.delayed(
-          //   const Duration(milliseconds: 500),
-          //   () => scrollController.jumpTo(mediaQuery.size.height),
-          // );
+          Future<void>.delayed(
+            const Duration(milliseconds: 500),
+            () => scrollController.animateTo(
+              mediaQuery.size.height,
+              curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 300),
+            ),
+          );
         });
 
         final Uri? uri = await ref.read(endpointUrlProvider.future);
@@ -137,6 +142,7 @@ class ConfigurationScreen extends HookConsumerWidget {
                   .row()
                   .crossAxisAlignment(.center)
                   .spacing($Spaces.xs())(
+                key: urlKey,
                 children: <Widget>[
                   IconStyler().size(18).color($Colors.textSecondary())(
                     icon: Icons.link_rounded,
@@ -280,59 +286,77 @@ class ConfigurationScreen extends HookConsumerWidget {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
           padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
-          child: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child:
-                FlexBoxStyler()
-                    .column()
-                    .mainAxisAlignment(.center)
-                    .crossAxisAlignment(.stretch)
-                    .maxWidth(460)
-                    .wrap(.box(BoxStyler().alignment(.center)))
-                    .paddingX($Spaces.md())
-                    .paddingTop($Spaces.sm())
-                    .paddingBottom($Spaces.lg())(
-                  children: <Widget>[
-                    FlexBoxStyler()
-                        .column()
-                        .crossAxisAlignment(.stretch)
-                        .spacing($Spaces.md())(
-                      children: <Widget>[
-                        RouteHeader(
-                          isDark:
-                              ref.watch(themeProvider).asData?.value ==
-                              Themes.dark,
-                          onToggleTheme: () {
-                            ref.read(themeProvider.notifier).toggle();
-                          },
-                        ),
-                        BoxStyler().height($Spaces.sm())(),
-                        FlexBoxStyler()
-                            .column()
-                            .crossAxisAlignment(.start)
-                            .spacing($Spaces.xs())(
-                          children: <Widget>[
-                            TextStyler().style($TextStyles.h3())(
-                              'Configure your workspace',
-                            ),
-                            TextStyler().style($TextStyles.description())(
-                              'Connect to your API endpoint to retrieve pathfinding '
-                              'tasks and start calculating optimal routes.',
-                            ),
-                          ],
-                        ),
-                        const _TopologyCard(),
-                        buildEndpointCard(),
-                      ],
-                    ),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (TapDownDetails event) {
+              final BuildContext? context = urlKey.currentContext;
+              if (context == null) return;
+              final RenderObject? renderObject = context.findRenderObject();
+              if (renderObject is! RenderBox || !renderObject.hasSize) {
+                return;
+              }
+              final Offset localPosition = renderObject.globalToLocal(
+                event.globalPosition,
+              );
+              if (!(Offset.zero & renderObject.size).contains(localPosition)) {
+                urlFocusNode.unfocus();
+              }
+            },
+            child: SingleChildScrollView(
+              keyboardDismissBehavior:
+                  ScrollViewKeyboardDismissBehavior.onDrag,
+              child:
+                  FlexBoxStyler()
+                      .column()
+                      .mainAxisAlignment(.center)
+                      .crossAxisAlignment(.stretch)
+                      .maxWidth(460)
+                      .wrap(.box(BoxStyler().alignment(.center)))
+                      .paddingX($Spaces.md())
+                      .paddingTop($Spaces.sm())
+                      .paddingBottom($Spaces.lg())(
+                    children: <Widget>[
+                      FlexBoxStyler()
+                          .column()
+                          .crossAxisAlignment(.stretch)
+                          .spacing($Spaces.md())(
+                        children: <Widget>[
+                          RouteHeader(
+                            isDark:
+                                ref.watch(themeProvider).asData?.value ==
+                                Themes.dark,
+                            onToggleTheme: () {
+                              ref.read(themeProvider.notifier).toggle();
+                            },
+                          ),
+                          BoxStyler().height($Spaces.sm())(),
+                          FlexBoxStyler()
+                              .column()
+                              .crossAxisAlignment(.start)
+                              .spacing($Spaces.xs())(
+                            children: <Widget>[
+                              TextStyler().style($TextStyles.h3())(
+                                'Configure your workspace',
+                              ),
+                              TextStyler().style($TextStyles.description())(
+                                'Connect to your API endpoint to retrieve pathfinding '
+                                'tasks and start calculating optimal routes.',
+                              ),
+                            ],
+                          ),
+                          const _TopologyCard(),
+                          buildEndpointCard(),
+                        ],
+                      ),
 
-                    BoxStyler()
-                        .paddingTop($Spaces.md())
-                        .paddingBottom($Spaces.xl())(
-                      child: buildStartButton(),
-                    ),
-                  ],
-                ),
+                      BoxStyler()
+                          .paddingTop($Spaces.md())
+                          .paddingBottom($Spaces.xl())(
+                        child: buildStartButton(),
+                      ),
+                    ],
+                  ),
+            ),
           ),
         ),
       ),
