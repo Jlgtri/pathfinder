@@ -51,9 +51,6 @@ class ConfigurationScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ScrollController scrollController = PrimaryScrollController.of(
-      context,
-    );
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final GoRouter router = GoRouter.of(context);
 
@@ -64,6 +61,7 @@ class ConfigurationScreen extends HookConsumerWidget {
     final GlobalKey<State<StatefulWidget>> urlKey = useMemoized(GlobalKey.new);
     final TextEditingController urlController = useTextEditingController();
     final FocusNode urlFocusNode = useFocusNode();
+    final ScrollController scrollController = useScrollController();
 
     Uri? getUri() => parseUrl(urlController.text.trim());
 
@@ -75,9 +73,9 @@ class ConfigurationScreen extends HookConsumerWidget {
             await ref.read(endpointUrlProvider.notifier).set(uri);
           }
 
-          Future<void>.delayed(const Duration(milliseconds: 500), () {
+          Future<void>.delayed(const Duration(milliseconds: 500), () async {
             if (context.mounted) {
-              scrollController.animateTo(
+              await scrollController.animateTo(
                 mediaQuery.size.height,
                 curve: Curves.easeOut,
                 duration: const Duration(milliseconds: 300),
@@ -89,6 +87,8 @@ class ConfigurationScreen extends HookConsumerWidget {
         final Uri? uri = await ref.read(endpointUrlProvider.future);
         if (uri != null) {
           urlController.text = uri.toString();
+        } else if (kIsWeb) {
+          urlController.text = 'https://flutter.webspark.dev/flutter/api';
         }
       }),
     );
@@ -304,6 +304,7 @@ class ConfigurationScreen extends HookConsumerWidget {
               }
             },
             child: SingleChildScrollView(
+              controller: scrollController,
               keyboardDismissBehavior:
                   ScrollViewKeyboardDismissBehavior.onDrag,
               child:
@@ -326,8 +327,8 @@ class ConfigurationScreen extends HookConsumerWidget {
                             isDark:
                                 ref.watch(themeProvider).asData?.value ==
                                 Themes.dark,
-                            onToggleTheme: () {
-                              ref.read(themeProvider.notifier).toggle();
+                            onToggleTheme: () async {
+                              await ref.read(themeProvider.notifier).toggle();
                             },
                           ),
                           BoxStyler().height($Spaces.sm())(),
