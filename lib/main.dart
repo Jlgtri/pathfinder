@@ -1,15 +1,12 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:dio_compatibility_layer/dio_compatibility_layer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:http/http.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:rhttp/rhttp.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:talker/talker.dart';
@@ -22,14 +19,6 @@ import 'src/routes.dart';
 import 'src/utils/proxy_interceptor.dart';
 
 Future<void> main() async {
-  final Client compatibleClient;
-  if (!kIsWeb) {
-    await Rhttp.init();
-    compatibleClient = await RhttpCompatibleClient.create();
-  } else {
-    compatibleClient = Client();
-  }
-
   WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: WidgetsBinding.instance);
 
@@ -44,8 +33,7 @@ Future<void> main() async {
           printResponseHeaders: true,
         ),
       ),
-    )
-    ..httpClientAdapter = ConversionLayerAdapter(compatibleClient);
+    );
 
   final ProviderContainer container = ProviderContainer(
     overrides: <Override>[

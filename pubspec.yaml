@@ -39,7 +39,6 @@ dependencies:
   http: 1.6.0
   resilify: 1.4.0
   retrofit: 4.10.0
-  rhttp: 0.18.0
 
   # Other
   ack: 2.0.0-beta.3
@@ -52,6 +51,7 @@ dependencies:
   path_provider: 2.1.6
   riverpod_annotation: 4.0.8
 
+  rhttp: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
