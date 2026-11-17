@@ -75,14 +75,15 @@ class ConfigurationScreen extends HookConsumerWidget {
             await ref.read(endpointUrlProvider.notifier).set(uri);
           }
 
-          Future<void>.delayed(
-            const Duration(milliseconds: 500),
-            () => scrollController.animateTo(
-              mediaQuery.size.height,
-              curve: Curves.easeOut,
-              duration: const Duration(milliseconds: 300),
-            ),
-          );
+          Future<void>.delayed(const Duration(milliseconds: 500), () {
+            if (context.mounted) {
+              scrollController.animateTo(
+                mediaQuery.size.height,
+                curve: Curves.easeOut,
+                duration: const Duration(milliseconds: 300),
+              );
+            }
+          });
         });
 
         final Uri? uri = await ref.read(endpointUrlProvider.future);
