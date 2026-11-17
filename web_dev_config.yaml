@@ -1,0 +1,5 @@
+server:
+  proxy:
+    - target: "https://flutter.webspark.dev/"
+      prefix: "/webspark/"
+      replace: ""

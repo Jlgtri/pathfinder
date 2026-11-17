@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=./build.yaml
+targets:
+  $default:
+    sources:
+      include:
+        - $package$
+        - lib/$lib$
+        - lib/**.dart
+        - source/**
+        - pubspec.yaml
+        - .env
+      exclude:
+        - '**.*.dart'
+
+    builders:
+      dart_mappable_builder:
+        enabled: true
+        generate_for:
+          include:
+            - lib/src/api/**.dart
+            - lib/src/api.dart
+            - lib/src/providers/**.dart
+            - lib/src/providers.dart
+
+      flutter_gen_runner:
+        enabled: true
+        options:
+          output: lib/src/generated/
+          integrations:
+            flutter_svg: true
+          assets:
+            enabled: true
+          fonts:
+            enabled: true
+          colors:
+            enabled: true
+
+      go_router_builder:
+        enabled: true
+        generate_for:
+          include:
+            - lib/src/routes/**.dart
+            - lib/src/routes.dart
+
+      mix_generator:
+        enabled: true
+        generate_for:
+          include:
+            - lib/src/styles/**.dart
+            - lib/src/styles.dart
+
+      retrofit_generator:
+        enabled: true
+        generate_for:
+          include:
+            - lib/src/**.dart
+        options:
+          format_output: true
+          auto_cast_response: true
+          use_result: false
+
+      riverpod_generator:
+        enabled: true
+        generate_for:
+          include:
+            - lib/src/providers/**.dart
+            - lib/src/providers.dart
